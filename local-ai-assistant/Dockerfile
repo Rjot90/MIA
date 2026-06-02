@@ -13,7 +13,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     CUDA_VISIBLE_DEVICES=0 \
-    CMAKE_ARGS="-DLLAMA_CUDA=on" \
+    CMAKE_ARGS="-DGGML_CUDA=on" \
     FORCE_CMAKE=1 \
     CUDA_HOME=/usr/local/cuda \
     PATH=/usr/local/cuda/bin:$PATH
@@ -57,6 +57,7 @@ ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH}"
 COPY requirements.txt .
 RUN pip install --upgrade pip setuptools wheel ninja scikit-build-core
 RUN pip install -r requirements.txt
+RUN pip install llama-cpp-python==0.3.25 --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu122 --no-cache-dir
 
 # ============================================================================
 # COPIE CODE APPLICATION

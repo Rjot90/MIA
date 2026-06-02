@@ -19,6 +19,20 @@ class APIBridge:
             "include_context": include_context,
             "max_tokens": 1024
         }
+    # À RAJOUTER À LA FIN DE discord_bridge.py (dans la classe APIBridge)
+    async def clear_history(self, user_id: str) -> bool:
+        url = f"{self.api_url}/history"
+        try:
+            async with aiohttp.ClientSession() as session:
+                # On appelle l'endpoint DELETE de ton FastAPI
+                async with session.delete(url, params={"user_id": str(user_id)}) as response:
+                    if response.status == 200:
+                        logger.info(f"Mémoire effacée pour {user_id}")
+                        return True
+                    return False
+        except Exception as e:
+            logger.error(f"Erreur lors de l'effacement de la mémoire: {e}")
+            return False
         
         try:
             # We use a large timeout because llama.cpp can take 20-40s

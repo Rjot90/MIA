@@ -118,6 +118,8 @@ services:
     networks:
       - local-ai-network
     restart: unless-stopped
+    healthcheck:
+      disable: true
     logging:
       driver: "json-file"
       options:

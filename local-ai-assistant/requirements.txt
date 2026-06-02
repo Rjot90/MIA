@@ -19,7 +19,7 @@ python-dotenv==1.0.0      # Gestion variables d'environnement
 # ============================================================================
 # llama-cpp-python supporte NVIDIA CUDA nativement
 # La version CUDA est compilée automatiquement si CUDA driver est présent
-llama-cpp-python==0.3.25  # Bindings Python pour llama.cpp
+#llama-cpp-python==0.3.25  # Bindings Python pour llama.cpp
 
 # ============================================================================
 # BASE DE DONNÉES
@@ -78,4 +78,5 @@ tqdm==4.66.1              # Progress bars (téléchargement modèles)
 # ============================================================================
 discord.py==2.3.2
 aiohttp==3.9.1
+duckduckgo-search>=5.0.0
 

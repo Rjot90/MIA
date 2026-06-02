@@ -78,16 +78,16 @@ class AppSettings(BaseSettings):
     
     # Paramètres llama.cpp (optimisés RTX 2060 6 Go)
     # ⚠️ GPU/CPU OFFLOADING STRATEGY ⚠️
-    n_gpu_layers: int = 20  # Layers GPU (20-25) + CPU (8-13)
+    n_gpu_layers: int = 33  # Layers GPU (20-25) + CPU (8-13)
                             # Balance: stable (pas de CUDA OOM) vs performance
                             # Ajuster si VRAM issues ou pour plus de perf
-    n_threads: int = 8      # CPU threads (AMD Ryzen 7 3700X = 8 cores)
-    n_batch: int = 256      # Batch size (256 OK)
-    n_ctx: int = 1024       # Context window (1024 = stable, 2048 = risky)
+    n_threads: int = 12      # CPU threads (AMD Ryzen 7 3700X = 8 cores)
+    n_batch: int = 512      # Batch size (256 OK)
+    n_ctx: int = 8192       # Context window (1024 = stable, 2048 = risky)
     
     # Paramètres génération
-    max_tokens: int = 1024
-    temperature: float = 0.7
+    max_tokens: int = 2048
+    temperature: float = 0.2
     top_p: float = 0.95
     top_k: int = 40
     

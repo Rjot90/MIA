@@ -396,21 +396,22 @@ class InferenceEngine:
         else:
             # Default system prompt
             default_system = (
-                "Tu es un assistant IA expert, intelligent et concis. "
-                "Tu réponds toujours en français. "
-                "Utilise TOUJOURS le formatage Markdown pour structurer tes réponses (gras, listes) "
-                "et encadre TOUJOURS tes blocs de code avec les balises appropriées (ex: ```c ... ```). "
-                "Ne mentionne jamais ton processus de réflexion interne."
+                "Tu es MIA, un assistant IA de développement exécuté localement. "
+                "Réponds toujours en français, de manière experte, technique et directe au développeur. "
+                "Formate ton code en Markdown."
             )
             messages.append({"role": "system", "content": default_system})
         
         # Contexte conversation et Prompt utilisateur
-        if context:
-            messages.append({"role": "user", "content": f"Contexte:\n{context}\n\nQuestion:\n{prompt}"})
+        if context and context.strip():
+            messages.append({
+                "role": "user", 
+                "content": f"Voici le contexte de la conversation et/ou de la recherche Web :\n{context}\n\nMa question :\n{prompt}"
+                })
         else:
             messages.append({"role": "user", "content": prompt})
         
-        return messages
+        return messages 
     
     def get_info(self) -> Dict[str, Any]:
         """Retourne infos moteur."""

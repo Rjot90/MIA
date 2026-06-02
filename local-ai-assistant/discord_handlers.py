@@ -1,5 +1,6 @@
 import logging
 import discord
+import re
 from discord_bridge import APIBridge
 from discord_context import DiscordContextManager
 
@@ -33,13 +34,24 @@ class MessageHandler:
         prompt = content
         if prompt.startswith(self.prefix):
             prompt = prompt[len(self.prefix):].strip()
-        elif is_mention:
-            prompt = prompt.replace(f'<@{client.user.id}>', '').strip()
+        
+        # Enlever toutes les mentions du bot proprement
+        mention_pattern = f"<@!?{client.user.id}>"
+        prompt = re.sub(mention_pattern, '', prompt).strip()
 
         if not prompt:
             await message.channel.send("Que puis-je faire pour toi ?")
             return
-
+        
+        if prompt.lower() in ["reset", "clear", "oublie tout"]:
+            await message.channel.typing()
+            success = await self.bridge.clear_history(str(message.author.id))
+            if success:
+                await message.reply("🧹 **Lavage de cerveau terminé !** J'ai tout oublié, on repart de zéro.")
+            else:
+                await message.reply("❌ Oups, impossible d'effacer ma mémoire. L'API est injoignable.")
+            return
+        
         # Concurrency check per user
         if not self.context.add_active_request(message.author.id):
             await message.channel.send("Veuillez patienter, je suis déjà en train de traiter votre requête précédente.")
@@ -51,7 +63,7 @@ class MessageHandler:
             
             # Send typing indicator
             async with message.channel.typing():
-                # Call the bridge
+                # Call the bridge to get AI response
                 response = await self.bridge.infer(
                     prompt=prompt,
                     user_id=str(message.author.id),
@@ -73,17 +85,28 @@ class MessageHandler:
                     return
                 
                 text = response.get("text", "")
+                
+                # --- AFFICHAGE DANS LE TERMINAL POUR DÉBUGGER ---
+                print("\n" + "="*50)
+                print(f"REQUÊTE DE {message.author.name} : {prompt}")
+                print(f"RÉPONSE BRUTE DE L'IA :\n{text}")
+                print("="*50 + "\n")
+                
                 if text:
-                    import re
-                    # Remove <think>...</think> blocks even if the closing tag is missing
-                    text = re.sub(r'<think>.*?(</think>|$)', '', text, flags=re.DOTALL).strip()
-                    # Remove any leftover tags just in case
-                    text = text.replace('</think>', '').replace('<think>', '').strip()
+                    # --- NETTOYAGE INTELLIGENT ---
+                    if "<think>" in text:
+                        if "</think>" in text:
+                            # S'il a fini de réfléchir, on enlève la réflexion pour ne garder que la réponse
+                            text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
+                        else:
+                            # S'il n'a pas fini (coupé en plein milieu par manque de place)
+                            # On retire juste la balise d'ouverture et on affiche ses pensées sur Discord !
+                            text = text.replace("<think>", "⚠️ *[Réflexion inachevée - Manque de tokens]*\n").strip()
                     
                     if not text:
-                        text = "*(Le modèle a réfléchi mais n'a pas produit de réponse textuelle)*"
+                        text = "*(Le modèle a réfléchi mais n'a pas produit de réponse finale)*"
                         
-                    # Discord limits message length to 2000 chars, so we chunk it if necessary
+                    # Discord limits message length to 2000 chars
                     chunks = [text[i:i+1900] for i in range(0, len(text), 1900)]
                     for chunk in chunks:
                         await message.reply(chunk)
