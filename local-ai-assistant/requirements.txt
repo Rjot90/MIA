@@ -1,0 +1,81 @@
+# ==============================================================================
+# REQUIREMENTS.TXT - Phase 1 : Infrastructure Core
+# ==============================================================================
+# Versions fixées pour reproductibilité et stabilité
+# Toutes les dépendances sont optimisées pour RTX 2060 6 Go + 16 Go RAM
+# ==============================================================================
+
+# ============================================================================
+# FRAMEWORK API
+# ============================================================================
+fastapi==0.104.1          # Framework web asynchrone moderne
+uvicorn[standard]==0.24.0 # Serveur ASGI haute-performance
+pydantic==2.5.0           # Validation données + settings
+pydantic-settings==2.1.0  # Nécessaire pour BaseSettings (Pydantic V2)
+python-dotenv==1.0.0      # Gestion variables d'environnement
+
+# ============================================================================
+# INFÉRENCE IA - llama.cpp (VERSION CUDA OPTIMISÉE)
+# ============================================================================
+# llama-cpp-python supporte NVIDIA CUDA nativement
+# La version CUDA est compilée automatiquement si CUDA driver est présent
+llama-cpp-python==0.3.25  # Bindings Python pour llama.cpp
+
+# ============================================================================
+# BASE DE DONNÉES
+# ============================================================================
+sqlalchemy==2.0.23        # ORM SQL pour SQLite
+alembic==1.12.1           # Migrations SQL
+
+# ============================================================================
+# RAG / RECHERCHE FUTURE (Phase 3)
+# ============================================================================
+# Déjà inclus pour cohérence, utilisation en Phase 3
+requests==2.31.0          # Requêtes HTTP (DuckDuckGo API)
+beautifulsoup4==4.12.2    # Parsing HTML
+lxml==4.9.3               # Parser XML rapide
+
+# ============================================================================
+# LOGGING & MONITORING
+# ============================================================================
+loguru==0.7.2             # Logging avancé (meilleur que logging standard)
+python-json-logger==2.0.7 # Logs en JSON (production)
+
+# ============================================================================
+# UTILITAIRES
+# ============================================================================
+click==8.1.7              # CLI utilities
+tqdm==4.66.1              # Progress bars (téléchargement modèles)
+
+# ============================================================================
+# DÉVELOPPEMENT (optionnel, commenté pour prod)
+# ============================================================================
+# Décommentez si vous développez en local
+# pytest==7.4.3
+# black==23.12.0
+# flake8==6.1.0
+# mypy==1.7.1
+# ipython==8.18.1
+
+# ============================================================================
+# NOTES IMPORTANTES
+# ============================================================================
+# 
+# 1. llama-cpp-python détecte automatiquement CUDA et compile en consequence
+#    Si "pip install" échoue sur CUDA : installer nvidia-cuda-toolkit manuellement
+#
+# 2. Pas d'inclusion de transformers/torch pour Phase 1 (surdimensionné)
+#    Utilisé seulement si embeddings custom Phase 3
+#
+# 3. Toutes les dépendances sont pré-compilées (wheels) pour rapidité
+#
+# 4. Size total enveloppe : ~500 Mo (léger pour CI/CD)
+#
+# ==============================================================================
+
+# ============================================================================
+# DISCORD BOT (Phase 2)
+# ============================================================================
+discord.py==2.3.2
+aiohttp==3.9.1
+
