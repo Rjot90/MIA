@@ -195,11 +195,11 @@ class InferenceEngine:
     def __init__(
         self,
         model_path: str | Path,
-        n_gpu_layers: int = 33,
+        n_gpu_layers: int = 18,
         n_threads: int = 8,
-        n_batch: int = 256,
-        n_ctx: int = 2048,
-        temperature: float = 0.7,
+        n_batch: int = 512,
+        n_ctx: int = 4096,
+        temperature: float = 0.2,
         top_p: float = 0.95,
         timeout: int = 300  # 5 minutes max inférence
     ):
@@ -225,6 +225,7 @@ class InferenceEngine:
             'n_threads': n_threads,
             'n_batch': n_batch,
             'n_ctx': n_ctx,
+            'flash_attn': True,
             'verbose': True
         }
         
@@ -270,11 +271,11 @@ class InferenceEngine:
         logger.info(f"✓ File size: {self.model_path.stat().st_size / (1024**3):.2f} GB")
         
         # Vérification VRAM
-        if not VRAMMonitor.check_vram_available(self.MODEL_VRAM_REQUIRED_MB):
-            raise RuntimeError(
-                f"Insufficient VRAM. Need {self.MODEL_VRAM_REQUIRED_MB} MB, "
-                f"but only {VRAMMonitor.get_vram_usage()['total_mb']} MB available"
-            )
+       # if not VRAMMonitor.check_vram_available(self.MODEL_VRAM_REQUIRED_MB):
+        #    raise RuntimeError(
+        #       f"Insufficient VRAM. Need {self.MODEL_VRAM_REQUIRED_MB} MB, "
+        #       f"but only {VRAMMonitor.get_vram_usage()['total_mb']} MB available"
+        #   )
         
         # Chargement
         try:

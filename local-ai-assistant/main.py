@@ -36,7 +36,7 @@ from datetime import datetime
 from config import settings, setup_logging, ensure_directories
 from memory import init_memory, MemoryManager
 from inference import init_inference_engine, InferenceEngine, VRAMMonitor
-
+from rag_manager import CodeKnowledgeBase
 # ==============================================================================
 # LOGGING SETUP
 # ==============================================================================
@@ -51,6 +51,7 @@ logger = logging.getLogger(__name__)
 # Ces objets sont créés au startup et partagés par tous les endpoints
 memory_manager: Optional[MemoryManager] = None
 inference_engine: Optional[InferenceEngine] = None
+code_kb: Optional[CodeKnowledgeBase] = None
 
 
 # ==============================================================================
@@ -135,7 +136,8 @@ async def lifespan(app: FastAPI):
         
         # Initialiser inférence (lazy load modèle)
         global inference_engine
-        
+        global code_kb
+
         # Vérifier modèle existe, sinon télécharger
         model_path = settings.models_path / settings.model_file
         
@@ -155,6 +157,12 @@ async def lifespan(app: FastAPI):
             top_p=settings.top_p
         )
         logger.info("✓ Inference engine initialized (lazy load)")
+        
+        try:
+            code_kb = CodeKnowledgeBase()
+            logger.info("✓ Code Knowledge Base (RAG) initialized")
+        except Exception as e:
+            logger.error(f"⚠️ Erreur de chargement du RAG: {e}")
         
         logger.info("=" * 80)
         logger.info("✓ APPLICATION READY")
@@ -311,6 +319,14 @@ async def infer(request: InferenceRequest) -> InferenceResponse:
                 window_messages=5
             )
         
+        if code_kb:
+            logger.info("🔍 Recherche dans la base de code RAG...")
+            # On cherche les 3 meilleurs extraits par rapport au prompt
+            code_snippets = code_kb.search(request.prompt, top_k=3)
+            if code_snippets and code_snippets.strip():
+                # On les ajoute au contexte que l'IA va lire
+                context += f"\n\n[CONTEXTE CODE SOURCE TROUVÉ]\n{code_snippets}"
+        
         # Stocke la question en mémoire
         memory_manager.add_message(
             role="user",
@@ -330,7 +346,7 @@ async def infer(request: InferenceRequest) -> InferenceResponse:
         # Stocke la réponse
         memory_manager.add_message(
             role="assistant",
-            content=result['text'],
+            content=result["text"],
             user_id=request.user_id,
             tokens_used=result['tokens_used']
         )

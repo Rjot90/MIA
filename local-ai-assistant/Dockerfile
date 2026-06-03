@@ -57,6 +57,7 @@ ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH}"
 COPY requirements.txt .
 RUN pip install --upgrade pip setuptools wheel ninja scikit-build-core
 RUN pip install -r requirements.txt
+ENV CMAKE_ARGS="-DLLAMA_CUBLAS=on"
 RUN pip install llama-cpp-python==0.3.25 --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu122 --no-cache-dir
 
 # ============================================================================
@@ -71,6 +72,8 @@ COPY discord_bot.py .
 COPY discord_bridge.py .
 COPY discord_context.py .
 COPY discord_handlers.py .
+COPY rag_manager.py .
+COPY ingest.py .
 
 # ============================================================================
 # CRÉATION RÉPERTOIRES POUR DONNÉES PERSISTANTES

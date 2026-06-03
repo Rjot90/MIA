@@ -31,9 +31,13 @@ alembic==1.12.1           # Migrations SQL
 # RAG / RECHERCHE FUTURE (Phase 3)
 # ============================================================================
 # Déjà inclus pour cohérence, utilisation en Phase 3
-requests==2.31.0          # Requêtes HTTP (DuckDuckGo API)
-beautifulsoup4==4.12.2    # Parsing HTML
-lxml==4.9.3               # Parser XML rapide
+requests==2.31.0
+beautifulsoup4==4.12.2
+lxml==4.9.3
+langchain==0.1.0
+langchain-community==0.0.13
+chromadb==0.4.22
+sentence-transformers==2.2.2
 
 # ============================================================================
 # LOGGING & MONITORING

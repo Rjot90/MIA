@@ -3,80 +3,52 @@ version: '3.9'
 # ==============================================================================
 # DOCKER COMPOSE : Orchestration du service Local AI Assistant
 # ==============================================================================
-# Cette configuration crée un container isolé avec :
-# - FastAPI accessible sur http://localhost:8000
-# - Volumes persistants pour modèles, mémoire, documents
-# - Gestion mémoire/CPU pour RTX 2060 + 16 Go RAM
-# ==============================================================================
 
 services:
   local-ai:
-    # Construction de l'image depuis Dockerfile local
     build:
       context: .
       dockerfile: Dockerfile
-    
-    # Nom du container
     container_name: local-ai-assistant
+    runtime: nvidia
+    env_file:
+      - .env
     
-    # ========================================================================
-    # RESSOURCES SYSTÈME
-    # ========================================================================
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
               count: 1
-              capabilities: [gpu]
+              capabilities: [gpu, utility, compute]
 
-    # ========================================================================
-    # VOLUMES PERSISTANTS
-    # ========================================================================
     volumes:
-      # Modèles IA (GGUF) - téléchargement une seule fois
       - ./models:/app/models
-
-      # Base de données SQLite (mémoire conversation)
       - ./data:/app/data
-
-      # Documents locaux (GitHub repos, PDFs, livres)
       - ./documents:/app/documents
-
-      # Logs applicatifs
       - ./logs:/app/logs
 
-    # ========================================================================
-    # PORTS EXPOSITION
-    # ========================================================================
     ports:
-      # FastAPI REST API : http://localhost:8000
-      # - Docs Swagger : http://localhost:8000/docs
-      # - Redoc : http://localhost:8000/redoc
       - "8000:8000"
 
     # ========================================================================
-    # VARIABLES D'ENVIRONNEMENT
+    # VARIABLES D'ENVIRONNEMENT (PROPRES ET FUSIONNÉES)
     # ========================================================================
     environment:
-      # Mode DEBUG (désactiver en production)
-      DEBUG: "false"
-      
-      # CUDA
+      # Autorisations NVIDIA
+      NVIDIA_VISIBLE_DEVICES: "all"
+      NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
       CUDA_VISIBLE_DEVICES: "0"
+      LD_LIBRARY_PATH: "/usr/lib/x86_64-linux-gnu"
       
-      # Données
+      # Configuration de l'App
+      DEBUG: "false"
       DATA_PATH: "/app/data"
       MODELS_PATH: "/app/models"
       DOCUMENTS_PATH: "/app/documents"
-      
-      # Logging
       LOG_LEVEL: "INFO"
       LOG_FILE: "/app/logs/app.log"
 
-    # ========================================================================
-    # HEALTH CHECK
-    # ========================================================================
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -84,20 +56,12 @@ services:
       retries: 3
       start_period: 40s
 
-    # ========================================================================
-    # RÉSEAU ET SÉCURITÉ
-    # ========================================================================
-    # Network peut rester par défaut (bridge)
     networks:
       - local-ai-network
     
-    # Pas de privilèges élevés (sécurité)
     privileged: false
-    
-    # Restart policy
     restart: unless-stopped
 
-    # Logs
     logging:
       driver: "json-file"
       options:
@@ -126,24 +90,9 @@ services:
         max-size: "10m"
         max-file: "3"
 
-# ==============================================================================
-# RÉSEAU PARTAGÉ
-# ==============================================================================
 networks:
   local-ai-network:
     driver: bridge
     ipam:
       config:
         - subnet: 172.20.0.0/16
-
-# ==============================================================================
-# VOLUMES NOMMÉS (optionnel pour persistance avancée)
-# ==============================================================================
-# Décommentez si vous voulez utiliser des volumes Docker au lieu de bind mounts
-# volumes:
-#   models_volume:
-#     driver: local
-#   data_volume:
-#     driver: local
-#   documents_volume:
-#     driver: local
