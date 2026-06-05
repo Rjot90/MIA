@@ -28,7 +28,7 @@ def main():
     ADMIN_USERS = os.getenv("DISCORD_ADMIN_USERS", "")
     PREFIX = os.getenv("DISCORD_PREFIX", "!")
     API_URL = os.getenv("PHASE1_API_URL", "http://localhost:8000")
-    ENDPOINT = os.getenv("PHASE1_INFER_ENDPOINT", "/infer")
+    ENDPOINT = os.getenv("PHASE1_INFER_ENDPOINT", "/api/infer")
     TIMEOUT = int(os.getenv("DISCORD_LATENCY_TIMEOUT", "45"))
 
     # Parse lists

@@ -37,7 +37,6 @@ lxml==4.9.3
 langchain==0.1.0
 langchain-community==0.0.13
 chromadb==0.4.22
-sentence-transformers==2.2.2
 
 # ============================================================================
 # LOGGING & MONITORING
@@ -82,5 +81,9 @@ tqdm==4.66.1              # Progress bars (téléchargement modèles)
 # ============================================================================
 discord.py==2.3.2
 aiohttp==3.9.1
-duckduckgo-search>=5.0.0
-
+duckduckgo-search==6.1.7
+langchain==0.1.0
+langchain-community==0.0.13
+chromadb==0.4.22
+sentence-transformers==2.7.0
+pypdf==4.0.1

@@ -110,6 +110,7 @@ class AppSettings(BaseSettings):
         env_file = ".env"
         case_sensitive = False
         extra = "allow"  # Permet fields supplémentaires
+        protected_namespaces = () # Fix Pydantic V2 warnings for fields starting with model_
 
 
 # ==============================================================================

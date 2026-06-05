@@ -50,7 +50,7 @@ services:
       LOG_FILE: "/app/logs/app.log"
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -73,7 +73,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: local-ai-discord-bot
-    command: python discord_bot.py
+    command: python bot/discord_bot.py
     env_file:
       - .env.phase2
     depends_on:

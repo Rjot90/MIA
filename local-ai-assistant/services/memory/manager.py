@@ -269,62 +269,63 @@ class MemoryManager:
     def get_conversation_history(
         self,
         user_id: str = "default",
-        limit: int = 50,
-        offset: int = 0
+        max_tokens: int = 2000
     ) -> List[Dict[str, Any]]:
         """
-        Récupère l'historique conversations.
+        Récupère l'historique conversations en respectant une limite de tokens (Sliding Window).
         
         Args:
             user_id: Utilisateur
-            limit: Nombre dernier messages
-            offset: Pour pagination
+            max_tokens: Nombre maximum de tokens pour l'historique retourné.
         
         Returns:
             List de dicts {role, content, timestamp, tokens_used}
         """
         with self.get_session() as session:
+            # Récupérer les messages du plus récent au plus ancien
             messages = session.query(Conversation).filter(
                 Conversation.user_id == user_id
             ).order_by(
                 Conversation.timestamp.desc()
-            ).limit(limit).offset(offset).all()
+            ).all()
         
-            return [
-                {
+            history = []
+            current_tokens = 0
+            
+            for m in messages:
+                # Approximation des tokens si non fourni par le LLM (surtout pour les messages user)
+                msg_tokens = m.tokens_used if m.tokens_used > 0 else len(m.content) // 4
+                
+                if current_tokens + msg_tokens > max_tokens:
+                    break # La fenêtre glissante est pleine
+                
+                current_tokens += msg_tokens
+                history.append({
                     "id": m.id,
                     "role": m.role,
                     "content": m.content,
                     "timestamp": m.timestamp.isoformat(),
                     "tokens": m.tokens_used,
                     "model": m.model_name
-                }
-                for m in reversed(messages)  # Reversed pour chronologique
-            ]
+                })
+            
+            # Retourner dans l'ordre chronologique (du plus ancien de la fenêtre au plus récent)
+            return history[::-1]
     
     def get_conversation_context(
         self,
         user_id: str = "default",
-        max_tokens: int = 2000,
-        window_messages: int = 10
+        max_tokens: int = 2000
     ) -> str:
         """
         Reconstruit le contexte conversation pour inférence.
         
         Retourne format prêt à envoyer au LLM :
         "User: message 1\nAssistant: réponse 1\nUser: message 2\n..."
-        
-        Args:
-            user_id: Utilisateur
-            max_tokens: Limite tokens (approx)
-            window_messages: Dernier N messages à inclure
-        
-        Returns:
-            String formaté pour prompt LLM
         """
         messages = self.get_conversation_history(
             user_id=user_id,
-            limit=window_messages
+            max_tokens=max_tokens
         )
         
         if not messages:

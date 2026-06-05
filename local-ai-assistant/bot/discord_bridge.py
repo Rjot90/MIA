@@ -42,7 +42,7 @@ class APIBridge:
 
     # LA FONCTION EST MAINTENANT BIEN SÉPARÉE À LA FIN DE LA CLASSE
     async def clear_history(self, user_id: str) -> bool:
-        url = f"{self.api_url}/history"
+        url = f"{self.api_url}/api/history"
         try:
             async with aiohttp.ClientSession() as session:
                 # On appelle l'endpoint DELETE de ton FastAPI

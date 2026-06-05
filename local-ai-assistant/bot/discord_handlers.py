@@ -106,10 +106,35 @@ class MessageHandler:
                     if not text:
                         text = "*(Le modèle a réfléchi mais n'a pas produit de réponse finale)*"
                         
-                    # Discord limits message length to 2000 chars
-                    chunks = [text[i:i+1900] for i in range(0, len(text), 1900)]
+                    # Discord limits message length to 2000 chars. Smart chunking to avoid cutting words.
+                    max_chunk_size = 1900
+                    chunks = []
+                    
+                    # Split by lines first to try and keep formatting intact
+                    lines = text.split('\n')
+                    current_chunk = ""
+                    
+                    for line in lines:
+                        # If a single line is too long, we have to hard-split it
+                        if len(line) > max_chunk_size:
+                            if current_chunk:
+                                chunks.append(current_chunk)
+                                current_chunk = ""
+                            # Hard split the long line
+                            for i in range(0, len(line), max_chunk_size):
+                                chunks.append(line[i:i+max_chunk_size])
+                        elif len(current_chunk) + len(line) + 1 > max_chunk_size:
+                            chunks.append(current_chunk)
+                            current_chunk = line + "\n"
+                        else:
+                            current_chunk += line + "\n"
+                            
+                    if current_chunk.strip():
+                        chunks.append(current_chunk.strip())
+
                     for chunk in chunks:
-                        await message.reply(chunk)
+                        if chunk:
+                            await message.reply(chunk)
                 else:
                     await message.channel.send("❌ La réponse générée est vide.")
                     
