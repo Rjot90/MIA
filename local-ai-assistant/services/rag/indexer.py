@@ -38,17 +38,55 @@ class CodeKnowledgeBase:
         except Exception as e:
             logger.warning(f"Erreur lors du chargement des fichiers texte : {e}")
 
-        # 3. Charger le code (Python, JS, etc. - Récursif)
+        # 3. Charger le code (Python, C/C++, JS, TS - Récursif)
+        common_exclude = ["venv", "env", "__pycache__", ".git", "node_modules", "dist", "build"]
+        
         try:
             py_loader = GenericLoader.from_filesystem(
                 source_folder, glob="**/*.py",
                 suffixes=[".py"],
-                exclude=["venv", "env", "__pycache__", ".git", "node_modules"],
+                exclude=common_exclude,
                 parser=LanguageParser(language=Language.PYTHON, parser_threshold=500)
             )
             all_documents.extend(py_loader.load())
         except Exception as e:
-            logger.warning(f"Erreur lors du chargement du code : {e}")
+            logger.warning(f"Erreur lors du chargement du code Python : {e}")
+
+        # C / C++
+        try:
+            cpp_loader = GenericLoader.from_filesystem(
+                source_folder, glob="**/*",
+                suffixes=[".c", ".cpp", ".h", ".hpp"],
+                exclude=common_exclude,
+                parser=LanguageParser(language=Language.CPP, parser_threshold=500)
+            )
+            all_documents.extend(cpp_loader.load())
+        except Exception as e:
+            logger.warning(f"Erreur lors du chargement du code C/C++ : {e}")
+
+        # JavaScript / React
+        try:
+            js_loader = GenericLoader.from_filesystem(
+                source_folder, glob="**/*",
+                suffixes=[".js", ".jsx"],
+                exclude=common_exclude,
+                parser=LanguageParser(language=Language.JS, parser_threshold=500)
+            )
+            all_documents.extend(js_loader.load())
+        except Exception as e:
+            logger.warning(f"Erreur lors du chargement du code JS : {e}")
+
+        # TypeScript / React
+        try:
+            ts_loader = GenericLoader.from_filesystem(
+                source_folder, glob="**/*",
+                suffixes=[".ts", ".tsx"],
+                exclude=common_exclude,
+                parser=LanguageParser(language=Language.TS, parser_threshold=500)
+            )
+            all_documents.extend(ts_loader.load())
+        except Exception as e:
+            logger.warning(f"Erreur lors du chargement du code TS : {e}")
 
         if not all_documents:
             logger.info("Aucun document trouvé à indexer.")

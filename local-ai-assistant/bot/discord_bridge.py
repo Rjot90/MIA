@@ -6,10 +6,11 @@ from typing import Optional, Dict, Any
 logger = logging.getLogger(__name__)
 
 class APIBridge:
-    def __init__(self, api_url: str, endpoint: str, timeout: int = 180):
+    def __init__(self, api_url: str, endpoint: str, timeout: int = 300, max_tokens: int = 4096):
         self.api_url = api_url.rstrip("/")
         self.endpoint = endpoint
         self.timeout = timeout
+        self.max_tokens = max_tokens
         
     async def infer(self, prompt: str, user_id: str, include_context: bool = True) -> Optional[Dict[str, Any]]:
         url = f"{self.api_url}{self.endpoint}"
@@ -17,7 +18,7 @@ class APIBridge:
             "prompt": prompt,
             "user_id": str(user_id),
             "include_context": include_context,
-            "max_tokens": 1024
+            "max_tokens": self.max_tokens
         }
         
         try:

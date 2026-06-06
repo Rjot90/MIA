@@ -29,7 +29,7 @@ def main():
     PREFIX = os.getenv("DISCORD_PREFIX", "!")
     API_URL = os.getenv("PHASE1_API_URL", "http://localhost:8000")
     ENDPOINT = os.getenv("PHASE1_INFER_ENDPOINT", "/api/infer")
-    TIMEOUT = int(os.getenv("DISCORD_LATENCY_TIMEOUT", "45"))
+    TIMEOUT = int(os.getenv("DISCORD_LATENCY_TIMEOUT", "300"))
 
     # Parse lists
     allowed_channels = [c.strip() for c in CHANNEL_ID.split(",") if c.strip()]
